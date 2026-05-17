@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { DashboardNav } from "@/components/app/dashboard-nav";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   await auth.protect();
   const supabaseReady = isSupabaseConfigured();

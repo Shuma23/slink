@@ -8,7 +8,15 @@ import { getDashboardStats } from "@/lib/data";
 import { absoluteUrl, formatDate, toShortNumber } from "@/lib/utils";
 
 export default async function DashboardPage() {
-  const stats = await getDashboardStats();
+  let stats;
+
+  try {
+    stats = await getDashboardStats();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown server error";
+    console.error("Failed to load dashboard", error);
+    return <DashboardLoadError message={message} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -101,6 +109,24 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+    </div>
+  );
+}
+
+function DashboardLoadError({ message }: { message: string }) {
+  return (
+    <div className="rounded-lg border border-red-100 bg-white p-6 shadow-sm">
+      <div className="max-w-2xl">
+        <p className="text-sm font-semibold text-red-600">ダッシュボードを読み込めませんでした</p>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-950">Supabaseまたは認証連携の設定を確認してください</h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          ログインは完了していますが、ダッシュボード用データの取得でエラーになりました。
+          開発中は下の詳細をもとにSupabaseのRLS、Clerk連携、環境変数を確認してください。
+        </p>
+        <pre className="mt-4 overflow-auto rounded-md bg-slate-950 p-4 text-xs leading-6 text-white">
+          {message}
+        </pre>
       </div>
     </div>
   );
