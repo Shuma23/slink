@@ -59,7 +59,8 @@ npm run dev
 ## Routes
 
 - `/` サービスLP
-- `/sign-in`, `/sign-up` Clerk auth pages
+- `/sign-in` custom Clerk-powered login page
+- `/sign-up` redirects to `/sign-in` while public sign-up is closed
 - `/dashboard` analytics overview
 - `/dashboard/links` link list, search, label filter, archive toggle
 - `/dashboard/links/new` link creation

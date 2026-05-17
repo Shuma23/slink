@@ -51,7 +51,7 @@ export default async function Home() {
                 <Link href="/sign-in">ログイン</Link>
               </Button>
               <Button asChild>
-                <Link href="/sign-up">無料で始める</Link>
+                <Link href="/sign-in">管理画面へ</Link>
               </Button>
               </>
             ) : (
