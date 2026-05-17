@@ -4,6 +4,7 @@ import { archiveLinkAction, toggleLinkActiveAction } from "@/actions/links";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { CopyLinkButton } from "@/components/app/copy-link-button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getLabels, getLinks } from "@/lib/data";
@@ -88,7 +89,8 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
                         {link.title || link.slug}
                       </Link>
                       <div className="mt-1 flex items-center gap-2 text-xs text-slate-500">
-                        {absoluteUrl(`/${link.path_type}/${link.slug}`)}
+                        <span>{absoluteUrl(`/${link.path_type}/${link.slug}`)}</span>
+                        <CopyLinkButton value={absoluteUrl(`/${link.path_type}/${link.slug}`)} label="短縮URLをコピー" />
                         <a href={`/${link.path_type}/${link.slug}`} target="_blank" rel="noreferrer">
                           <ExternalLink className="h-3 w-3" />
                         </a>

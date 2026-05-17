@@ -10,6 +10,7 @@ import { ExportComingSoonButton, LinkMetaForm, SingleDestinationForm } from "@/c
 import { OgpPanel } from "@/components/app/ogp-panel";
 import { QrPanel } from "@/components/app/qr-panel";
 import { ClickLineChart, DeviceBarChart } from "@/components/app/analytics-chart";
+import { CopyLinkButton } from "@/components/app/copy-link-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,10 +58,13 @@ export default async function LinkDetailPage({ params }: LinkDetailProps) {
               {link.is_archived ? "アーカイブ" : link.is_active ? "有効" : "無効"}
             </Badge>
           </div>
-          <a href={shortUrl} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-2 break-all text-sm text-blue-700">
-            {shortUrl}
-            <ExternalLink className="h-3 w-3" />
-          </a>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
+            <a href={shortUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 break-all text-blue-700">
+              {shortUrl}
+              <ExternalLink className="h-3 w-3" />
+            </a>
+            <CopyLinkButton value={shortUrl} label="短縮URLをコピー" />
+          </div>
           <p className="mt-1 break-all text-sm text-slate-500">{link.original_url}</p>
         </div>
         <div className="flex gap-2">
