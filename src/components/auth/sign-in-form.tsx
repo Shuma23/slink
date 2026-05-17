@@ -38,6 +38,22 @@ function normalizeRedirectUrl(value: string | null) {
   }
 }
 
+async function activateCompletedSession(
+  sessionId: string | null,
+  setActive: NonNullable<ReturnType<typeof useSignIn>["setActive"]>,
+  redirectUrl: string,
+  router: ReturnType<typeof useRouter>,
+) {
+  if (!sessionId) {
+    return false;
+  }
+
+  await setActive({ session: sessionId });
+  router.push(redirectUrl);
+  router.refresh();
+  return true;
+}
+
 export function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -63,20 +79,39 @@ export function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await signIn.create({
-        identifier,
-        password,
-        strategy: "password",
-      });
+      const createdSignIn = await signIn.create({ identifier });
 
-      if (result.status === "complete" && result.createdSessionId) {
-        await setActive({ session: result.createdSessionId });
-        router.push(redirectUrl);
-        router.refresh();
+      if (
+        createdSignIn.status === "complete" &&
+        await activateCompletedSession(createdSignIn.createdSessionId, setActive, redirectUrl, router)
+      ) {
         return;
       }
 
-      setError("追加認証が必要です。現在のログイン画面ではメール/パスワード認証のみ対応しています。");
+      const passwordFactor = createdSignIn.supportedFirstFactors?.find(
+        (factor) => factor.strategy === "password",
+      );
+
+      if (createdSignIn.status === "needs_first_factor" && passwordFactor) {
+        const passwordAttempt = await createdSignIn.attemptFirstFactor({
+          strategy: "password",
+          password,
+        });
+
+        if (
+          passwordAttempt.status === "complete" &&
+          await activateCompletedSession(passwordAttempt.createdSessionId, setActive, redirectUrl, router)
+        ) {
+          return;
+        }
+
+        if (passwordAttempt.status === "needs_second_factor") {
+          setError("2段階認証が必要です。現在のログイン画面は2段階認証にまだ対応していません。");
+          return;
+        }
+      }
+
+      setError("メール/パスワードでログインできませんでした。Clerk側でパスワード認証が有効か確認してください。");
     } catch (caughtError) {
       setError(getClerkErrorMessage(caughtError));
     } finally {
