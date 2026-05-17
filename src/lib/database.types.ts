@@ -18,6 +18,7 @@ export type Database = {
           path_type: "s" | "t" | "p";
           title: string | null;
           description: string | null;
+          memo: string | null;
           og_image_url: string | null;
           is_active: boolean;
           is_archived: boolean;
@@ -32,6 +33,7 @@ export type Database = {
           path_type?: "s" | "t" | "p";
           title?: string | null;
           description?: string | null;
+          memo?: string | null;
           og_image_url?: string | null;
           is_active?: boolean;
           is_archived?: boolean;

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { SlinkLogo } from "@/components/app/slink-logo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -40,11 +41,8 @@ export default async function Home() {
     <main className="min-h-screen bg-white text-slate-950">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="grid h-8 w-8 place-items-center rounded-md bg-slate-950 text-white">
-              <Link2 className="h-4 w-4" />
-            </span>
-            SLINK
+          <Link href="/">
+            <SlinkLogo />
           </Link>
           <nav className="flex items-center gap-2">
             {!userId ? (

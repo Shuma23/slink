@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { BarChart3, Link2, Settings, Tags, PanelsTopLeft, Plus } from "lucide-react";
+import { SlinkLogo } from "@/components/app/slink-logo";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -16,11 +17,8 @@ export function DashboardNav() {
     <aside className="border-b border-slate-200 bg-white md:sticky md:top-0 md:h-screen md:w-64 md:border-b-0 md:border-r">
       <div className="flex h-full flex-col gap-4 p-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <span className="grid h-8 w-8 place-items-center rounded-md bg-slate-950 text-white">
-              <Link2 className="h-4 w-4" />
-            </span>
-            SLINK
+          <Link href="/">
+            <SlinkLogo />
           </Link>
           <UserButton />
         </div>

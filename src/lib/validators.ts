@@ -28,6 +28,7 @@ export const createLinkSchema = z.object({
   path_type: pathTypeSchema.default("s"),
   title: z.string().trim().max(120).optional().or(z.literal("")),
   description: z.string().trim().max(500).optional().or(z.literal("")),
+  memo: z.string().trim().max(2000).optional().or(z.literal("")),
   og_image_url: z.string().trim().url().optional().or(z.literal("")),
 });
 

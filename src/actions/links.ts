@@ -30,6 +30,7 @@ const linkMetaSchema = z.object({
   path_type: z.enum(["s", "t", "p"]),
   title: z.string().trim().max(120).optional().or(z.literal("")),
   description: z.string().trim().max(500).optional().or(z.literal("")),
+  memo: z.string().trim().max(2000).optional().or(z.literal("")),
   og_image_url: z.string().trim().url().optional().or(z.literal("")),
   is_active: z.boolean().optional(),
 });
@@ -54,6 +55,7 @@ export async function createLinkAction(_: ActionState | null, formData: FormData
     path_type: readString(formData, "path_type") || "s",
     title: readString(formData, "title"),
     description: readString(formData, "description"),
+    memo: readString(formData, "memo"),
     og_image_url: readString(formData, "og_image_url"),
   });
 
@@ -72,6 +74,7 @@ export async function createLinkAction(_: ActionState | null, formData: FormData
       path_type: parsed.data.path_type,
       title: parsed.data.title || null,
       description: parsed.data.description || null,
+      memo: parsed.data.memo || null,
       og_image_url: parsed.data.og_image_url || null,
     })
     .select("id")
@@ -99,6 +102,7 @@ export async function updateLinkAction(_: ActionState | null, formData: FormData
     path_type: readString(formData, "path_type") || "s",
     title: readString(formData, "title"),
     description: readString(formData, "description"),
+    memo: readString(formData, "memo"),
     og_image_url: readString(formData, "og_image_url"),
     is_active: formData.get("is_active") === "on",
   });
@@ -116,6 +120,7 @@ export async function updateLinkAction(_: ActionState | null, formData: FormData
       path_type: parsed.data.path_type,
       title: parsed.data.title || null,
       description: parsed.data.description || null,
+      memo: parsed.data.memo || null,
       og_image_url: parsed.data.og_image_url || null,
       is_active: parsed.data.is_active ?? true,
     })
@@ -141,6 +146,7 @@ export async function updateLinkMetaAction(_: ActionState | null, formData: Form
     path_type: readString(formData, "path_type") || "s",
     title: readString(formData, "title"),
     description: readString(formData, "description"),
+    memo: readString(formData, "memo"),
     og_image_url: readString(formData, "og_image_url"),
     is_active: formData.get("is_active") === "on",
   });
@@ -157,6 +163,7 @@ export async function updateLinkMetaAction(_: ActionState | null, formData: Form
       path_type: parsed.data.path_type,
       title: parsed.data.title || null,
       description: parsed.data.description || null,
+      memo: parsed.data.memo || null,
       og_image_url: parsed.data.og_image_url || null,
       is_active: parsed.data.is_active ?? true,
     })

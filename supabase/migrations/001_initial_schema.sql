@@ -8,6 +8,7 @@ create table if not exists public.links (
   path_type text not null default 's' check (path_type in ('s', 't', 'p')),
   title text,
   description text,
+  memo text,
   og_image_url text,
   is_active boolean not null default true,
   is_archived boolean not null default false,

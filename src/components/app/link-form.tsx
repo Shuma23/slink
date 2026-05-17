@@ -65,7 +65,7 @@ export function LinkMetaForm({ link }: { link: Link }) {
   return (
     <form action={action} className="grid gap-5">
       <input type="hidden" name="id" value={link.id} />
-      <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
+      <div className="grid items-start gap-4 sm:grid-cols-[140px_1fr]">
         <div className="grid gap-2">
           <Label>パス</Label>
           <Select name="path_type" defaultValue={link.path_type}>
@@ -89,12 +89,27 @@ export function LinkMetaForm({ link }: { link: Link }) {
         <Input id="meta_title" name="title" defaultValue={link.title ?? ""} placeholder="春のキャンペーン" />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="meta_description">説明</Label>
-        <Textarea id="meta_description" name="description" defaultValue={link.description ?? ""} />
-      </div>
-      <div className="grid gap-2">
         <Label htmlFor="meta_og_image_url">OGP画像URL</Label>
         <Input id="meta_og_image_url" name="og_image_url" type="url" defaultValue={link.og_image_url ?? ""} />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="meta_description">OGP説明文</Label>
+        <Textarea
+          id="meta_description"
+          name="description"
+          defaultValue={link.description ?? ""}
+          placeholder="SNSで表示する説明文。短縮URLのプレビュー用です。"
+        />
+      </div>
+      <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-4">
+        <Label htmlFor="meta_memo">内部メモ</Label>
+        <Textarea
+          id="meta_memo"
+          name="memo"
+          defaultValue={link.memo ?? ""}
+          placeholder="管理用のメモ。リンクを踏むユーザーには表示されません。"
+        />
+        <p className="text-xs text-slate-500">このメモは管理画面だけに表示されます。</p>
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input name="is_active" type="checkbox" defaultChecked={link.is_active} className="h-4 w-4" />
@@ -163,7 +178,7 @@ function LinkFields({ link }: { link?: Link }) {
           required
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-[140px_1fr]">
+      <div className="grid items-start gap-4 sm:grid-cols-[140px_1fr]">
         <div className="grid gap-2">
           <Label>パス</Label>
           <Select name="path_type" defaultValue={link?.path_type ?? "s"}>
@@ -180,7 +195,9 @@ function LinkFields({ link }: { link?: Link }) {
         <div className="grid gap-2">
           <Label htmlFor="slug">カスタムID</Label>
           <Input id="slug" name="slug" placeholder="spring-campaign" defaultValue={link?.slug} />
-          <p className="text-xs text-slate-500">未入力なら自動生成。英数字、ハイフン、アンダースコアが使えます。</p>
+          <p className="text-xs text-slate-500">
+            未入力なら自動生成。英数字、ハイフン、アンダースコアが使えます。
+          </p>
         </div>
       </div>
       <div className="grid gap-2">
@@ -188,12 +205,27 @@ function LinkFields({ link }: { link?: Link }) {
         <Input id="title" name="title" defaultValue={link?.title ?? ""} placeholder="春のキャンペーン" />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="description">説明</Label>
-        <Textarea id="description" name="description" defaultValue={link?.description ?? ""} />
-      </div>
-      <div className="grid gap-2">
         <Label htmlFor="og_image_url">OGP画像URL</Label>
         <Input id="og_image_url" name="og_image_url" type="url" defaultValue={link?.og_image_url ?? ""} />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="description">OGP説明文</Label>
+        <Textarea
+          id="description"
+          name="description"
+          defaultValue={link?.description ?? ""}
+          placeholder="SNSで表示する説明文。短縮URLのプレビュー用です。"
+        />
+      </div>
+      <div className="grid gap-2 rounded-md border border-slate-200 bg-slate-50 p-4">
+        <Label htmlFor="memo">内部メモ</Label>
+        <Textarea
+          id="memo"
+          name="memo"
+          defaultValue={link?.memo ?? ""}
+          placeholder="管理用のメモ。リンクを踏むユーザーには表示されません。"
+        />
+        <p className="text-xs text-slate-500">このメモは管理画面だけに表示されます。</p>
       </div>
     </>
   );

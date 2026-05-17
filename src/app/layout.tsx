@@ -16,6 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SLINK | 短縮リンク管理サービス",
   description: "短縮URL、QRコード、A/Bテスト、アナリティクスを一つにまとめるリンク管理サービスです。",
+  icons: {
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    shortcut: "/favicon.svg",
+    apple: "/slink-mark.svg",
+  },
 };
 
 export default function RootLayout({
