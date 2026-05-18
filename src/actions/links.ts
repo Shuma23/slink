@@ -245,6 +245,22 @@ export async function archiveLinkAction(formData: FormData) {
   revalidatePath(`/dashboard/links/${id}`);
 }
 
+export async function deleteLinkAction(formData: FormData) {
+  await auth.protect();
+  const id = readString(formData, "id");
+  const parsed = z.string().uuid().safeParse(id);
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  await supabase.from("links").delete().eq("id", parsed.data);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/links");
+}
+
 export async function addDestinationAction(_: ActionState | null, formData: FormData): Promise<ActionState> {
   await auth.protect();
   const parsed = destinationSchema.safeParse({

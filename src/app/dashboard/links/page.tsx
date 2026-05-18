@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CopyLinkButton } from "@/components/app/copy-link-button";
+import { DeleteLinkButton } from "@/components/app/delete-link-button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getLabels, getLinks } from "@/lib/data";
@@ -132,6 +133,7 @@ export default async function LinksPage({ searchParams }: LinksPageProps) {
                             {link.is_archived ? <RotateCcw className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
                           </Button>
                         </form>
+                        <DeleteLinkButton id={link.id} label={link.title || link.slug} />
                       </div>
                     </TableCell>
                   </TableRow>
