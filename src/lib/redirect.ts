@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { after } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { UAParser } from "ua-parser-js";
 import type { LinkDestination } from "@/lib/database.types";
@@ -37,6 +38,48 @@ function pickDestination(originalUrl: string, destinations: LinkDestination[]) {
   return { url: fallback.destination_url, destinationId: fallback.id };
 }
 
+type ClickEventPayload = {
+  linkId: string;
+  destinationId: string | null;
+  referrer: string | null;
+  userAgent: string | null;
+  ipHash: string;
+  country: string | null;
+};
+
+async function recordClickEvent(payload: ClickEventPayload) {
+  const parser = new UAParser(payload.userAgent ?? undefined);
+  const result = parser.getResult();
+  const deviceType = result.device.type ?? (result.os.name ? "desktop" : "unknown");
+  const supabase = createSupabaseServiceClient();
+
+  const insertClick = supabase.from("click_events").insert({
+    link_id: payload.linkId,
+    destination_id: payload.destinationId,
+    referrer: payload.referrer,
+    user_agent: payload.userAgent,
+    ip_hash: payload.ipHash,
+    country: payload.country,
+    device_type: deviceType,
+    browser: result.browser.name ?? null,
+    os: result.os.name ?? null,
+  });
+
+  const incrementDestination = payload.destinationId
+    ? supabase.rpc("increment_destination_clicks", { destination_uuid: payload.destinationId })
+    : Promise.resolve({ error: null });
+
+  const [clickResult, incrementResult] = await Promise.all([insertClick, incrementDestination]);
+
+  if (clickResult.error) {
+    console.error("Failed to record click event", clickResult.error);
+  }
+
+  if (incrementResult.error) {
+    console.error("Failed to increment destination clicks", incrementResult.error);
+  }
+}
+
 export async function handleShortLinkRedirect(
   request: NextRequest,
   pathType: "s" | "t" | "p",
@@ -45,7 +88,9 @@ export async function handleShortLinkRedirect(
   const supabase = createSupabaseServiceClient();
   const { data: link, error } = await supabase
     .from("links")
-    .select("*, link_destinations(*)")
+    .select(
+      "id, original_url, is_active, is_archived, link_destinations(id, destination_url, weight, is_active, clicks_count, link_id, created_at)",
+    )
     .eq("path_type", pathType)
     .eq("slug", slug)
     .single();
@@ -63,25 +108,18 @@ export async function handleShortLinkRedirect(
   const userAgent = request.headers.get("user-agent");
 
   if (!isLikelyBot(userAgent)) {
-    const parser = new UAParser(userAgent ?? undefined);
-    const result = parser.getResult();
-    const deviceType = result.device.type ?? (result.os.name ? "desktop" : "unknown");
-
-    await supabase.from("click_events").insert({
-      link_id: link.id,
-      destination_id: selected.destinationId,
+    const payload: ClickEventPayload = {
+      linkId: link.id,
+      destinationId: selected.destinationId,
       referrer: request.headers.get("referer"),
-      user_agent: userAgent,
-      ip_hash: getIpHash(request),
+      userAgent,
+      ipHash: getIpHash(request),
       country: request.headers.get("x-vercel-ip-country"),
-      device_type: deviceType,
-      browser: result.browser.name ?? null,
-      os: result.os.name ?? null,
-    });
+    };
 
-    if (selected.destinationId) {
-      await supabase.rpc("increment_destination_clicks", { destination_uuid: selected.destinationId });
-    }
+    after(async () => {
+      await recordClickEvent(payload);
+    });
   }
 
   return NextResponse.redirect(selected.url, { status: 302 });
