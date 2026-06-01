@@ -32,6 +32,9 @@ export default async function LinkDetailPage({ params }: LinkDetailProps) {
     map.set(key, (map.get(key) ?? 0) + 1);
     return map;
   }, new Map());
+  const dailyClickRows = Array.from(dailyClicks.entries())
+    .map(([date, value]) => ({ date, clicks: value }))
+    .sort((a, b) => a.date.localeCompare(b.date));
   const deviceRows = clicks.reduce<Map<string, number>>((map, click) => {
     const key = click.device_type || "unknown";
     map.set(key, (map.get(key) ?? 0) + 1);
@@ -180,7 +183,7 @@ export default async function LinkDetailPage({ params }: LinkDetailProps) {
                 <CardTitle>日別クリック</CardTitle>
               </CardHeader>
               <CardContent>
-                <ClickLineChart data={Array.from(dailyClicks.entries()).map(([date, value]) => ({ date, clicks: value }))} />
+                <ClickLineChart data={dailyClickRows} />
               </CardContent>
             </Card>
             <Card>

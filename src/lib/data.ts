@@ -53,9 +53,19 @@ export async function getLinks(options?: {
   if (!links?.length) return [];
 
   const ids = links.map((link) => link.id);
-  const [{ data: labelRows }, { data: clickRows }] = await Promise.all([
+  const [{ data: labelRows }, clickCountEntries] = await Promise.all([
     supabase.from("link_labels").select("link_id, label_id").in("link_id", ids),
-    supabase.from("click_events").select("link_id").in("link_id", ids),
+    Promise.all(
+      ids.map(async (id) => {
+        const { count, error: countError } = await supabase
+          .from("click_events")
+          .select("id", { count: "exact", head: true })
+          .eq("link_id", id);
+
+        if (countError) throw new Error(countError.message);
+        return [id, count ?? 0] as const;
+      }),
+    ),
   ]);
 
   const labelIds = [...new Set((labelRows ?? []).map((row) => row.label_id))];
@@ -72,10 +82,7 @@ export async function getLinks(options?: {
     labelsByLink.set(row.link_id, labels);
   }
 
-  const clicksByLink = new Map<string, number>();
-  for (const row of clickRows ?? []) {
-    clicksByLink.set(row.link_id, (clicksByLink.get(row.link_id) ?? 0) + 1);
-  }
+  const clicksByLink = new Map<string, number>(clickCountEntries);
 
   const mapped = links.map((link) => ({
     ...link,
@@ -166,22 +173,16 @@ export async function getLinkDetail(id: string) {
   const { data: link, error } = await supabase.from("links").select("*").eq("id", id).single();
   if (error || !link) notFound();
 
-  const [{ data: destinations }, { data: clicks }, { data: labelRows }, { data: allLabels }] =
-    await Promise.all([
-      supabase
-        .from("link_destinations")
-        .select("*")
-        .eq("link_id", id)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("click_events")
-        .select("*")
-        .eq("link_id", id)
-        .order("clicked_at", { ascending: false })
-        .limit(300),
-      supabase.from("link_labels").select("label_id").eq("link_id", id),
-      supabase.from("labels").select("*").order("created_at", { ascending: false }),
-    ]);
+  const [{ data: destinations }, clicks, { data: labelRows }, { data: allLabels }] = await Promise.all([
+    supabase
+      .from("link_destinations")
+      .select("*")
+      .eq("link_id", id)
+      .order("created_at", { ascending: true }),
+    getAllClickEventsForLink(supabase, id),
+    supabase.from("link_labels").select("label_id").eq("link_id", id),
+    supabase.from("labels").select("*").order("created_at", { ascending: false }),
+  ]);
 
   const attachedIds = new Set((labelRows ?? []).map((row) => row.label_id));
   const labels = ((allLabels ?? []) as Label[]).filter((label) => attachedIds.has(label.id));
@@ -189,10 +190,37 @@ export async function getLinkDetail(id: string) {
   return {
     link,
     destinations: (destinations ?? []) as LinkDestination[],
-    clicks: (clicks ?? []) as ClickEvent[],
+    clicks,
     labels,
     allLabels: (allLabels ?? []) as Label[],
   };
+}
+
+async function getAllClickEventsForLink(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  linkId: string,
+) {
+  const pageSize = 1000;
+  const clicks: ClickEvent[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const to = from + pageSize - 1;
+    const { data, error } = await supabase
+      .from("click_events")
+      .select("*")
+      .eq("link_id", linkId)
+      .order("clicked_at", { ascending: false })
+      .range(from, to);
+
+    if (error) throw new Error(error.message);
+    clicks.push(...((data ?? []) as ClickEvent[]));
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+  }
+
+  return clicks;
 }
 
 export async function getLandingPages() {
